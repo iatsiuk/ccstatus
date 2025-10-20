@@ -1,0 +1,30 @@
+# Binaries
+ccstatus
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test and coverage
+*.test
+*.out
+coverage.out
+
+# Build artifacts
+dist/
+build/
+
+# IDE and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Debug and temporary files
+debug-wrapper.sh
+*.log
