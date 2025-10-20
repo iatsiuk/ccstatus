@@ -17,6 +17,10 @@ Real-time context usage monitor for Claude Code status line.
 - Zero dependencies
 - Handles empty/new sessions gracefully
 
+## Known Issues
+
+Status line may not appear immediately on Claude Code startup. It will display after the first message exchange or when pressing Shift+Tab, as Claude Code updates the status line only when conversation messages update (throttled to 300ms).
+
 ## Algorithm
 
 Context calculation (corrected after codex-expert review):
