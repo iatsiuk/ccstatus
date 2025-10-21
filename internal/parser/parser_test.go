@@ -178,20 +178,3 @@ func TestParseTranscriptZeroUsage(t *testing.T) {
 		})
 	}
 }
-
-// benchmark parsing performance
-func BenchmarkParseTranscriptFromReader(b *testing.B) {
-	// realistic transcript with 10 messages
-	var sb strings.Builder
-	for i := 0; i < 10; i++ {
-		sb.WriteString(`{"message":{"role":"assistant","usage":{"input_tokens":9,"cache_read_input_tokens":58164,"cache_creation_input_tokens":1097,"output_tokens":2}}}`)
-		sb.WriteString("\n")
-	}
-	transcript := sb.String()
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		reader := strings.NewReader(transcript)
-		_, _ = parseTranscriptFromReader(reader)
-	}
-}

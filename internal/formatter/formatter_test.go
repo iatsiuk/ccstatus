@@ -2,6 +2,7 @@ package formatter
 
 import (
 	"ccstatus/internal/calculator"
+	"os"
 	"strings"
 	"testing"
 )
@@ -51,70 +52,20 @@ func TestFormat(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := Format(tt.info, tt.model)
+			got := formatWithColors(tt.info, tt.model)
 
 			if !strings.Contains(got, tt.wantColor) {
-				t.Errorf("Format() does not contain expected color %q, got %q", tt.wantColor, got)
+				t.Errorf("formatWithColors() does not contain expected color %q, got %q", tt.wantColor, got)
 			}
 
 			for _, want := range tt.wantContains {
 				if !strings.Contains(got, want) {
-					t.Errorf("Format() does not contain %q, got %q", want, got)
+					t.Errorf("formatWithColors() does not contain %q, got %q", want, got)
 				}
 			}
 
 			if !strings.Contains(got, ColorReset) {
-				t.Errorf("Format() does not contain color reset")
-			}
-		})
-	}
-}
-
-func TestFormatCompact(t *testing.T) {
-	tests := []struct {
-		name      string
-		info      calculator.ContextInfo
-		wantColor string
-	}{
-		{
-			name: "compact green",
-			info: calculator.ContextInfo{
-				CurrentTokens: 50000,
-				MaxTokens:     200000,
-				Percentage:    25.0,
-			},
-			wantColor: ColorGreen,
-		},
-		{
-			name: "compact yellow",
-			info: calculator.ContextInfo{
-				CurrentTokens: 140000,
-				MaxTokens:     200000,
-				Percentage:    70.0,
-			},
-			wantColor: ColorYellow,
-		},
-		{
-			name: "compact red",
-			info: calculator.ContextInfo{
-				CurrentTokens: 180000,
-				MaxTokens:     200000,
-				Percentage:    90.0,
-			},
-			wantColor: ColorRed,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := FormatCompact(tt.info)
-
-			if !strings.Contains(got, tt.wantColor) {
-				t.Errorf("FormatCompact() does not contain expected color %q", tt.wantColor)
-			}
-
-			if !strings.Contains(got, "[") || !strings.Contains(got, "%]") {
-				t.Errorf("FormatCompact() format incorrect, got %q", got)
+				t.Errorf("formatWithColors() does not contain color reset")
 			}
 		})
 	}
@@ -195,30 +146,25 @@ func TestGetColor(t *testing.T) {
 	}
 }
 
-// benchmark formatter performance
-func BenchmarkFormat(b *testing.B) {
-	info := calculator.ContextInfo{
-		CurrentTokens: 59261,
-		MaxTokens:     200000,
-		Percentage:    29.6305,
-	}
-	model := "claude-sonnet-4-5"
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_ = Format(info, model)
-	}
-}
-
-func BenchmarkFormatCompact(b *testing.B) {
-	info := calculator.ContextInfo{
-		CurrentTokens: 59261,
-		MaxTokens:     200000,
-		Percentage:    29.6305,
+func TestIsTerminal(t *testing.T) {
+	tests := []struct {
+		name     string
+		file     *os.File
+		wantBool bool
+	}{
+		{
+			name:     "nil file returns false",
+			file:     nil,
+			wantBool: false,
+		},
 	}
 
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_ = FormatCompact(info)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := isTerminal(tt.file)
+			if got != tt.wantBool {
+				t.Errorf("isTerminal() = %v, want %v", got, tt.wantBool)
+			}
+		})
 	}
 }

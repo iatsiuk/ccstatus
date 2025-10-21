@@ -223,25 +223,3 @@ func TestGetModelLimit(t *testing.T) {
 		})
 	}
 }
-
-// benchmark calculation performance
-func BenchmarkCalculate(b *testing.B) {
-	usage := &parser.Usage{
-		InputTokens:              9,
-		CacheReadInputTokens:     58164,
-		CacheCreationInputTokens: 1097,
-		OutputTokens:             2,
-	}
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_ = Calculate(usage, "claude-sonnet-4-5")
-	}
-}
-
-func BenchmarkGetUsageLevel(b *testing.B) {
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		_ = GetUsageLevel(75.5)
-	}
-}

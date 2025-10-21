@@ -3,6 +3,7 @@ package formatter
 import (
 	"ccstatus/internal/calculator"
 	"fmt"
+	"os"
 )
 
 // ANSI color codes
@@ -14,9 +15,28 @@ const (
 	ColorCyan   = "\033[36m"
 )
 
-// Format creates colored status line output
-// Returns formatted string with ANSI colors based on usage level
+// uses os.ModeCharDevice to detect TTY on unix systems (macOS, Linux)
+func isTerminal(f *os.File) bool {
+	if f == nil {
+		return false
+	}
+	fi, err := f.Stat()
+	if err != nil {
+		return false
+	}
+	return fi.Mode()&os.ModeCharDevice != 0
+}
+
+// automatically detects TTY and falls back to plain output
 func Format(info calculator.ContextInfo, model string) string {
+	if !isTerminal(os.Stdout) {
+		return FormatPlain(info, model)
+	}
+	return formatWithColors(info, model)
+}
+
+// used internally by Format() and for testing
+func formatWithColors(info calculator.ContextInfo, model string) string {
 	usageLevel := calculator.GetUsageLevel(info.Percentage)
 	color := getColor(usageLevel)
 
@@ -31,20 +51,6 @@ func Format(info calculator.ContextInfo, model string) string {
 	)
 }
 
-// FormatCompact creates shorter status line for limited space
-func FormatCompact(info calculator.ContextInfo) string {
-	usageLevel := calculator.GetUsageLevel(info.Percentage)
-	color := getColor(usageLevel)
-
-	// format: [29.6%]
-	return fmt.Sprintf("%s[%.1f%%]%s",
-		color,
-		info.Percentage,
-		ColorReset,
-	)
-}
-
-// FormatPlain creates output without colors
 func FormatPlain(info calculator.ContextInfo, model string) string {
 	return fmt.Sprintf("[ctx: %d/%d %.1f%%] %s",
 		info.CurrentTokens,
@@ -54,8 +60,11 @@ func FormatPlain(info calculator.ContextInfo, model string) string {
 	)
 }
 
-// FormatError creates error output with red color
+// automatically detects TTY and falls back to plain output
 func FormatError(errorMsg string) string {
+	if !isTerminal(os.Stdout) {
+		return fmt.Sprintf("[ERROR: %s]", errorMsg)
+	}
 	return fmt.Sprintf("%s[ERROR: %s]%s",
 		ColorRed,
 		errorMsg,
@@ -63,7 +72,6 @@ func FormatError(errorMsg string) string {
 	)
 }
 
-// getColor returns ANSI color code based on usage level
 func getColor(level string) string {
 	switch level {
 	case "green":

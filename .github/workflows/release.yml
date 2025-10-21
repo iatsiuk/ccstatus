@@ -37,12 +37,26 @@ jobs:
           zip ccstatus-darwin-arm64.zip ccstatus
           rm ccstatus
 
+      - name: Build Linux AMD64
+        run: |
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ccstatus
+          zip ccstatus-linux-amd64.zip ccstatus
+          rm ccstatus
+
+      - name: Build Linux ARM64
+        run: |
+          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o ccstatus
+          zip ccstatus-linux-arm64.zip ccstatus
+          rm ccstatus
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
             ccstatus-darwin-amd64.zip
             ccstatus-darwin-arm64.zip
+            ccstatus-linux-amd64.zip
+            ccstatus-linux-arm64.zip
           draft: false
           prerelease: false
         env:
